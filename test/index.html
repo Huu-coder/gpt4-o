@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Animation</title>
+    <style>
+        .fade-in {
+            opacity: 0;
+            transition: opacity 0.3s ease-in;
+        }
+
+        .visible {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="textContainer"></div>
+
+    <script>
+        const text = `"Chaof Banj" is likely a phonetic spelling of "jauf banj," which refers to a type of Cambodian rice noodle dish. It's a popular breakfast food in Cambodia, consisting of fermented rice noodles served with a variety of toppings such as vegetables, herbs, and sometimes meat. The dish is often accompanied by a light fish sauce or a sweet and savory coconut sauce.`;
+
+        // Tách đoạn văn bản thành từng từ
+        const words = text.split(" ");
+        const container = document.getElementById("textContainer");
+
+        words.forEach((word, index) => {
+            // Tạo một span cho mỗi từ và thêm class fade-in
+            const span = document.createElement("span");
+            span.textContent = word + " ";
+            span.classList.add("fade-in");
+
+            // Thêm span vào container
+            container.appendChild(span);
+
+            // Dùng setTimeout để áp dụng class visible cho từng từ
+            setTimeout(() => {
+                span.classList.add("visible");
+            }, index * 100); // 300ms cho mỗi từ để tổng thời gian là khoảng 3 giây
+        });
+    </script>
+</body>
+</html>
