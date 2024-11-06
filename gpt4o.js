@@ -14,7 +14,7 @@ function escapeHtml(str) {
 
     const OpenAI = require("openai");
 
-    const token = "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";
+    const token = "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";
     const endpoint = "https://models.inference.ai.azure.com";
     const modelName = "gpt-4o";
 
