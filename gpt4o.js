@@ -1,20 +1,8 @@
-function escapeHtml(str) {
-    return str.replace(/[&<>"']/g, function(match) {
-      switch (match) {
-        case "&": return "&amp;";
-        case "<": return "&lt;";
-        case ">": return "&gt;";
-        case "\"": return "&quot;";
-        case "'": return "&#39;";
-      }
-    });
-  }
-
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 
     const OpenAI = require("openai");
 
-    const token = "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";
+    const token = "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";
     const endpoint = "https://models.inference.ai.azure.com";
     const modelName = "gpt-4o";
 
@@ -39,6 +27,7 @@ function escapeHtml(str) {
         apiKey: token,
         dangerouslyAllowBrowser: true
       });
+      console.log(n)
 
       try {
         // Tạo phần tử HTML để chứa câu hỏi của người dùng
@@ -51,15 +40,14 @@ function escapeHtml(str) {
 
         // Tạo yêu cầu chat
         const response = await client.chat.completions.create({
-          messages: [
-            { role: "system", content: "You are a helpful assistant." },
-            { role: "user", content: n }
-          ],
-          temperature: 1.0,
-          top_p: 1.0,
-          max_tokens: 1000,
-          model: modelName
-        });
+            messages: [
+                { role:"user", content: n }
+              ],
+              model: modelName
+            });
+
+          console.log(response.choices[0].message.content);
+
 
         // Xử lý kết quả trả về từ API
         if (response.choices && response.choices.length > 0) {
