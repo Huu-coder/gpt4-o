@@ -26,3 +26,16 @@
 </html>
 <script src="./gpt4o.js"></script>
 <script src="./all.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const codeBlock = document.querySelector(".code-block");
+
+        codeBlock.addEventListener("click", function() {
+            navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+                alert("Nội dung đã được sao chép vào clipboard!");
+            }).catch(err => {
+                console.error("Không thể sao chép nội dung: ", err);
+            });
+        });
+    });
+    </script>

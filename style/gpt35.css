@@ -2,19 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Afacad+Flux:wght@100..1000&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap');
 
 /* CSS cho hiệu ứng fade-in */
-.fade-in {
-    opacity: 0;
-    transition: opacity 0.5s ease-in; /* 0.5 giây để hiển thị từ từ */
-}
 
-.visible {
-    opacity: 1;
-}
-
-.fade-in-word {
-    opacity: 0;
-    transition: opacity 0.5s ease-in; /* Tạo hiệu ứng mờ dần trong 0.5 giây */
-  }
 
 * {
     font-family: "Afacad Flux";
@@ -284,3 +272,21 @@ code {
     border-radius: 10px;
     border-top-left-radius: 0;
 }
+
+.sys-ans:last-child {
+    overflow: hidden; /* Ensures the content is not revealed until the animation */
+    animation:
+        typing 3.5s steps(40, end),
+        blink-caret .75s step-end infinite;
+}
+
+@keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+  }
+
+  /* The typewriter cursor effect */
+  @keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: orange; }
+  }
