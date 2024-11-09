@@ -1,60 +1,71 @@
 
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 
-    const OpenAI = require("openai");
-    
-    const token = localStorage.getItem('scrt');
+    fetch('/api/github/repos')
+  .then(response => response.json())
+  .then(data => {
+    console.log('Dữ liệu từ GitHub:', data);
+  })
+  .catch(error => {
+    console.error('Lỗi khi gọi API trung gian:', error);
+  });
 
-    const endpoint = "https://models.inference.ai.azure.com";
-    const modelName = "gpt-4o";
+ // Client-side Code
+const endpoint = "https://models.inference.ai.azure.com";
+const modelName = "gpt-4o";
 
-    let sysAnsContainer = document.querySelector('.sys');
+let sysAnsContainer = document.querySelector('.sys');
 
-    function escapeHtmlOutsideCode(input) {
-        // Ensure the input is a string
-        if (typeof input !== 'string') {
-            input = String(input);
-        }
-
-        // Regex to find <code> blocks and capture their contents
-        const codeRegex = /<code>([\s\S]*?)<\/code>/g;
-        let codeBlocks = [];
-        let index = 0;
-
-        // Step 1: Replace <code> blocks with placeholders and escape `</code>` inside them
-        let escapedHtml = input.replace(codeRegex, (match, content) => {
-            const safeContent = content.replace(/<\/code>/g, "&lt;/code&gt;"); // Escape </code>
-            codeBlocks.push(safeContent); // Store the escaped content
-            return `<code data-placeholder-id="${index++}"></code>`; // Use placeholder
-        });
-
-        // Step 2: Escape all other HTML tags (like < and >) outside of <code> blocks
-        escapedHtml = escapedHtml.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-        // Step 3: Rebuild the HTML and restore <code> blocks content
-        let container = document.createElement('div');
-        container.innerHTML = escapedHtml;
-
-        codeBlocks.forEach((content, i) => {
-            let codeElement = container.querySelector(`code[data-placeholder-id="${i}"]`);
-            if (codeElement) {
-                codeElement.textContent = content; // Restore the content inside <code>
-            }
-        });
-
-        // Return the final escaped HTML
-        return container.innerHTML;
+function escapeHtmlOutsideCode(input) {
+    // Đảm bảo đầu vào là chuỗi
+    if (typeof input !== 'string') {
+        input = String(input);
     }
 
+    // Regex để tìm các khối <code> và lưu nội dung
+    const codeRegex = /<code>([\s\S]*?)<\/code>/g;
+    let codeBlocks = [];
+    let index = 0;
 
-    async function main(n) {
+    // Bước 1: Thay thế <code> blocks bằng placeholder và escape </code> bên trong chúng
+    let escapedHtml = input.replace(codeRegex, (match, content) => {
+        const safeContent = content.replace(/<\/code>/g, "&lt;/code&gt;"); // Escape </code>
+        codeBlocks.push(safeContent); // Lưu lại nội dung đã escape
+        return `<code data-placeholder-id="${index++}"></code>`; // Sử dụng placeholder
+    });
+
+    // Bước 2: Escape các thẻ HTML khác (ví dụ: < và >)
+    escapedHtml = escapedHtml.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+    // Bước 3: Tạo lại HTML và phục hồi nội dung các khối <code>
+    let container = document.createElement('div');
+    container.innerHTML = escapedHtml;
+
+    codeBlocks.forEach((content, i) => {
+        let codeElement = container.querySelector(`code[data-placeholder-id="${i}"]`);
+        if (codeElement) {
+            codeElement.textContent = content; // Phục hồi nội dung vào trong <code>
+        }
+    });
+
+    // Trả lại HTML đã escape cuối cùng
+    return container.innerHTML;
+}
+
+async function main(n) {
+    try {
+        // Lấy API key từ server trung gian
+        const response = await fetch('http://localhost:3000/api/get-api-key');
+        const data = await response.json();
+        const token = data.apiKey;  // Lấy API key từ response
+
+        const OpenAI = require("openai");
         const client = new OpenAI({
-        baseURL: endpoint,
-        apiKey: token,
-        dangerouslyAllowBrowser: true
+            baseURL: endpoint,
+            apiKey: token,
+            dangerouslyAllowBrowser: true
         });
 
-        try {
         // Hiển thị câu hỏi của người dùng đã escape
         let usrAns = document.createElement('div');
         usrAns.className = "usr-ans";
@@ -63,44 +74,33 @@
         document.getElementById("usr").value = "";
         sysAnsContainer.scrollTop = sysAnsContainer.scrollHeight;
 
-        // Gọi API
-        const response = await client.chat.completions.create({
+        // Gọi API OpenAI
+        const openAIResponse = await client.chat.completions.create({
             messages: [{ role: "user", content: n }],
             model: modelName
         });
-        // Xử lý kết quả trả về
-        if (response.choices && response.choices.length > 0) {
-            let answer = response.choices[0].message.content;
+
+        // Xử lý kết quả trả về từ OpenAI
+        if (openAIResponse.choices && openAIResponse.choices.length > 0) {
+            let answer = openAIResponse.choices[0].message.content;
 
             // Chuyển đổi văn bản đặc biệt thành các thẻ HTML
             answer = answer.replace(/```([\s\S]*?)```/g, '<div class="code-block"><pre><code>$1</code></pre></div>');
             answer = answer.replace(/`([\s\S]*?)`/g, '<pre><code>$1</code></pre>');
             answer = answer.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
-            function escapeHTML(str) {
-                return str.replace(/[&<>"']/g, function(match) {
-                  const escape = {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#039;'
-                  };
-                  return escape[match];
-                });
-              }
+            let codeTagMatch = answer.match(/<code>(.*?)<\/code>/);
 
-             let codeTagMatch = answer.match(/<code>(.*?)<\/code>/);
-
-             if (codeTagMatch) {
+            if (codeTagMatch) {
                 let codeContent = codeTagMatch[1];
                 let escapedCodeContent = escapeHTML(codeContent);
                 let outputString = answer.replace(codeContent, escapedCodeContent);
                 console.log(outputString);
-                    // Gán trực tiếp vào sysAns
+
+                // Gán kết quả trả về vào phần tử sysAns
                 let sysAns = document.createElement('div');
                 sysAns.className = "sys-ans";
-                sysAns.innerHTML = outputString;// Gán HTML trực tiếp mà không cần escape thêm
+                sysAns.innerHTML = outputString; // Gán HTML trực tiếp mà không cần escape thêm
                 sysAnsContainer.appendChild(sysAns);
                 sysAnsContainer.scrollTop = sysAnsContainer.scrollHeight;
                 document.getElementById("usr").disabled = false;
@@ -109,18 +109,15 @@
                 console.log("Không có thẻ <code> trong chuỗi.");
                 let sysAns = document.createElement('div');
                 sysAns.className = "sys-ans";
-                sysAns.innerHTML = answer;// Gán HTML trực tiếp mà không cần escape thêm
+                sysAns.innerHTML = answer; // Gán HTML trực tiếp mà không cần escape thêm
                 sysAnsContainer.appendChild(sysAns);
                 sysAnsContainer.scrollTop = sysAnsContainer.scrollHeight;
                 document.getElementById("usr").disabled = false;
             }
-
-
-
         } else {
             throw new Error("No response from model.");
         }
-        } catch (err) {
+    } catch (err) {
         console.error("Error encountered:", err);
         let errorMsg = document.createElement('div');
         errorMsg.className = "sys-err";
@@ -128,28 +125,28 @@
         sysAnsContainer.appendChild(errorMsg);
         document.getElementById("usr").disabled = false;
         sysAnsContainer.scrollTop = sysAnsContainer.scrollHeight;
-        }
     }
-    // Lắng nghe sự kiện khi nhấn nút gửi
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById('sm').addEventListener("click", () => {
+}
+
+// Lắng nghe sự kiện khi nhấn nút gửi
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById('sm').addEventListener("click", () => {
         const usrValue = document.getElementById("usr").value;
         if (usrValue !== "") {
-          document.getElementById("usr").disabled = true;
-          main(usrValue).catch((err) => {
-            console.error("An error occurred:", err);
-          });
+            document.getElementById("usr").disabled = true;
+            main(usrValue).catch((err) => {
+                console.error("An error occurred:", err);
+            });
         }
-      });
-
-      document.getElementById("usr").addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          document.getElementById('sm').click();
-        }
-      });
     });
 
+    document.getElementById("usr").addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            document.getElementById('sm').click();
+        }
+    });
+});
 
 
 },{"openai":10}],2:[function(require,module,exports){

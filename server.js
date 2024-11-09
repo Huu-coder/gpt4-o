@@ -1,27 +1,17 @@
-import express from "express"
-import axios from "axios";
+// Server Trung Gian
+import express from 'express';
+import dotenv from 'dotenv';
 
+dotenv.config();
 const app = express();
-const port = 3001;
+const PORT = process.env.PORT || 3000;
 
-// API key của GitHub (lưu trữ ở server, không lộ ra ngoài)
-const GITHUB_API_KEY = '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';
-
-app.get('/api/github', async (req, res) => {
-  try {
-    const response = await axios.get('https://api.github.com/user', {
-      headers: {
-        'Authorization': `token ${GITHUB_API_KEY}`,
-      },
-    });
-
-    res.json(response.data);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Error calling GitHub API');
-  }
+// Tạo một endpoint để cung cấp API key
+app.get('/api/get-api-key', (req, res) => {
+  const apiKey = "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"; // Hoặc API key mà bạn muốn cung cấp
+  res.json({ apiKey });  // Trả API key cho client
 });
 
-app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`Server đang chạy trên cổng ${PORT}`);
 });
